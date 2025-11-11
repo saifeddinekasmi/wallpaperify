@@ -1,0 +1,2 @@
+/Users/skasmi/Desktop/myprojects/wallpaperify-v2/android/app/.cxx/Debug/4jp292y5/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/skasmi/Desktop/myprojects/wallpaperify-v2/android/app/.cxx/Debug/4jp292y5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

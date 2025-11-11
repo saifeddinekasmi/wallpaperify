@@ -3,7 +3,11 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
-
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -22,24 +26,18 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.1'
 }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-}
-
 android {
-    namespace "com.example.wallpaperify"
-    compileSdkVersion 34 // Changed from flutter.compileSdkVersion to fixed version
-    ndkVersion flutter.ndkVersion
+    namespace "com.appwallp14.app"
+    compileSdk = 35 // This is the corrected SDK version
+    ndkVersion = "27.0.12077973" // This is the corrected NDK version
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17 // Updated to 17
+        sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '17'  // Must match Java version (17)
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -47,7 +45,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.wallpaperify.gallery"
+        applicationId "com.appwallp14.app"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -72,7 +70,6 @@ android {
         }
     }
 }
-
 flutter {
     source '../..'
 }
@@ -81,5 +78,4 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20" // Updated version
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'io.flutter:flutter_embedding_release:1.0.0-3.29.3'
 }

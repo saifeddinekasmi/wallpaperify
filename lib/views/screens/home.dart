@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:wallpaperify/controller/api_service.dart';
 import 'package:wallpaperify/model/model_category.dart';
 import 'package:wallpaperify/model/models_photo.dart';
@@ -22,17 +23,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   detailsGet() async {
     modlist = Api.getCategoriesList();
-    setState(() {
-      modlist = modlist;
-    });
+    setState(() {});
   }
 
   getTrendingWallpapers() async {
     trendingWallList = await Api.getTrendingWallpapers();
-
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   @override
@@ -45,94 +41,138 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        centerTitle: true,
-        elevation: 0.0,
         backgroundColor: Colors.white,
+        elevation: 1,
+        centerTitle: true,
         title: CustomAppBar(),
       ),
       body: isLoading
           ? Center(
               child: LoadingAnimationWidget.waveDots(
-                color: const Color.fromARGB(255, 0, 0, 0),
+                color: Colors.black,
                 size: 50,
               ),
             )
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: CustomSearchBar()),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 20),
-                    child: SizedBox(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width,
-                      child: ListView.builder(
+          : RefreshIndicator(
+              onRefresh: () async {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HomeScreen()));
+              },
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10),
+
+                      // ✅ Custom Search
+                      CustomSearchBar(),
+
+                      const SizedBox(height: 20),
+
+                      // ✅ Categories Title
+                      Text(
+                        "Categories",
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // ✅ Categories Horizontal List
+                      SizedBox(
+                        height: 95,
+                        child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: modlist.length,
-                          itemBuilder: ((context, index) => CatBlock(
-                                categorySrcImg: modlist[index].catImgUrl,
-                                nameCategory: modlist[index].catName,
-                              ))),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    height: 700,
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const HomeScreen()));
-                      },
-                      child: GridView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                  mainAxisExtent: 400,
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8),
-                          itemCount: trendingWallList.length,
-                          itemBuilder: ((context, index) => GridTile(
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => FullImage(
-                                                imgUrl: trendingWallList[index]
-                                                    .imgSrc)));
-                                  },
-                                  child: Hero(
-                                    tag: trendingWallList[index].imgSrc,
-                                    child: Container(
-                                      height: 800,
-                                      width: 50,
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                              110, 64, 169, 255),
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(20),
-                                        child: Image.network(
-                                            height: 800,
-                                            width: 50,
-                                            fit: BoxFit.cover,
-                                            trendingWallList[index].imgSrc),
-                                      ),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            return CatBlock(
+                              categorySrcImg: modlist[index].catImgUrl,
+                              nameCategory: modlist[index].catName,
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // ✅ Trending Wallpapers Title
+                      Text(
+                        "Trending",
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      // ✅ Trending Grid
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: trendingWallList.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.62,
+                        ),
+                        itemBuilder: (context, index) {
+                          final img = trendingWallList[index].imgSrc;
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          FullImage(imgUrl: img)));
+                            },
+                            child: Hero(
+                              tag: img,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 8,
+                                      offset: Offset(0, 3),
                                     ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Image.network(
+                                    img,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              ))),
-                    ),
-                  )
-                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
             ),
     );

@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:wallpaperify/controller/api_service.dart';
 import 'package:wallpaperify/model/models_photo.dart';
 import 'package:wallpaperify/views/screens/image.dart';
 import 'package:wallpaperify/views/widgets/myappbar.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-// ignore: must_be_immutable
 class CategoryScreen extends StatefulWidget {
-  String name;
-  String urlImg;
+  final String name;
+  final String urlImg;
 
-  CategoryScreen({super.key, required this.urlImg, required this.name});
+  const CategoryScreen({
+    super.key,
+    required this.urlImg,
+    required this.name,
+  });
 
   @override
   State<CategoryScreen> createState() => _CategoryScreenState();
@@ -19,124 +23,150 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   late List<GetPhotos> categoryResults;
   bool isLoading = true;
+
   getCatRelWall() async {
     categoryResults = await Api.searchWallpapers(widget.name);
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   @override
   void initState() {
-    getCatRelWall();
     super.initState();
+    getCatRelWall();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      backgroundColor: const Color(0xFFF8F8F8),
       appBar: AppBar(
-        centerTitle: true,
-        elevation: 0.0,
         backgroundColor: Colors.white,
+        elevation: 1,
+        centerTitle: true,
         title: CustomAppBar(),
       ),
       body: isLoading
           ? Center(
               child: LoadingAnimationWidget.waveDots(
-                color: const Color.fromARGB(255, 102, 99, 99),
+                color: Colors.black,
                 size: 50,
               ),
             )
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      Image.network(
-                          height: 150,
-                          width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.cover,
-                          widget.urlImg),
-                      Container(
-                        height: 150,
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.black38,
+          : Column(
+              children: [
+                // ✅ CATEGORY HEADER
+                Stack(
+                  children: [
+                    ClipRRect(
+                      child: Image.network(
+                        widget.urlImg,
+                        height: 170,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
-                      Positioned(
-                        left: 120,
-                        top: 40,
+                    ),
+
+                    // ✅ BLUR BLACK OVERLAY
+                    Container(
+                      height: 170,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withOpacity(0.6),
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ),
+
+                    // ✅ CATEGORY TITLE (CENTER)
+                    Positioned.fill(
+                      child: Center(
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Category",
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Color.fromARGB(255, 255, 255, 255),
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: 'my')),
+                            Text(
+                              "Category",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white70,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             Text(
                               widget.name,
-                              style: const TextStyle(
-                                  fontSize: 45,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'my'),
-                            )
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 38,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    height: 700,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 10),
+
+                // ✅ THE GRID
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: GridView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisExtent: 400,
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8),
-                        itemCount: categoryResults.length,
-                        itemBuilder: ((context, index) => GridTile(
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FullImage(
-                                              imgUrl: categoryResults[index]
-                                                  .imgSrc)));
-                                },
-                                child: Hero(
-                                  tag: categoryResults[index].imgSrc,
-                                  child: Container(
-                                    height: 800,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                        color: Color.fromARGB(109, 0, 65, 218),
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(
-                                          height: 800,
-                                          width: 50,
-                                          fit: BoxFit.cover,
-                                          categoryResults[index].imgSrc),
-                                    ),
+                      physics: const BouncingScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.62,
+                      ),
+                      itemCount: categoryResults.length,
+                      itemBuilder: (context, index) {
+                        final img = categoryResults[index].imgSrc;
+
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullImage(imgUrl: img),
+                              ),
+                            );
+                          },
+                          child: Hero(
+                            tag: img,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 3),
                                   ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
+                                child: Image.network(
+                                  img,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ))),
-                  )
-                ],
-              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }

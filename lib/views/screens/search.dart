@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:wallpaperify/controller/api_service.dart';
 import 'package:wallpaperify/model/models_photo.dart';
 import 'package:wallpaperify/views/screens/image.dart';
@@ -6,10 +7,10 @@ import 'package:wallpaperify/views/widgets/myappbar.dart';
 import 'package:wallpaperify/views/widgets/search.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-// ignore: must_be_immutable
 class SearchScreen extends StatefulWidget {
-  String query;
-  SearchScreen({super.key, required this.query});
+  final String query;
+
+  const SearchScreen({super.key, required this.query});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -18,98 +19,113 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   late List<GetPhotos> searchResults;
   bool isLoading = true;
-  getSearchResults() async {
+
+  Future<void> getSearchResults() async {
     searchResults = await Api.searchWallpapers(widget.query);
-    setState(() {
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
-
-
 
   @override
   void initState() {
-    // ignore: todo
-    // TODO: implement initState
     super.initState();
     getSearchResults();
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         centerTitle: true,
-        elevation: 0.0,
         backgroundColor: Colors.white,
+        elevation: 1,
         title: const CustomAppBar(),
       ),
       body: isLoading
           ? Center(
               child: LoadingAnimationWidget.waveDots(
-                color: const Color.fromARGB(255, 0, 0, 0),
+                color: Colors.black,
                 size: 50,
               ),
             )
           : SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: CustomSearchBar()),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    height: MediaQuery.of(context).size.height,
-                    child: GridView.builder(
-                      physics: const BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+
+                    // ✅ Search Bar
+                    CustomSearchBar(),
+
+                    const SizedBox(height: 20),
+
+                    // ✅ Title
+                    Text(
+                      "Results for \"${widget.query}\"",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // ✅ Grid of images
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: searchResults.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisExtent: 400,
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8),
-                      itemCount: searchResults.length,
-                      itemBuilder: ((context, index) => GridTile(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FullImage(
-                                        imgUrl: searchResults[index].imgSrc),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.62,
+                      ),
+                      itemBuilder: (context, index) {
+                        final img = searchResults[index].imgSrc;
+
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FullImage(imgUrl: img),
+                            ),
+                          ),
+                          child: Hero(
+                            tag: img,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 7,
+                                    offset: Offset(0, 3),
                                   ),
-                                );
-                              },
-                              child: Hero(
-                                tag: searchResults[index].imgSrc,
-                                child: Container(
-                                  height: 800,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                      color: Color.fromARGB(109, 0, 65, 218),
-                                      borderRadius: BorderRadius.circular(20)),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: Image.network(
-                                        height: 800,
-                                        width: 50,
-                                        fit: BoxFit.cover,
-                                        searchResults[index].imgSrc),
-                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
+                                child: Image.network(
+                                  img,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
-                          )),
+                          ),
+                        );
+                      },
                     ),
-                  )
-                ],
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
     );

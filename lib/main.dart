@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:wallpaperify/views/screens/home.dart';
 import 'package:wallpaperify/views/screens/privacy.dart';
@@ -8,120 +9,165 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Wallpaperify',
+
+      // ✅ GLOBAL THEME (Premium)
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF7F7F7),
+        primaryColor: const Color(0xFFFF007B),
+        textTheme: GoogleFonts.poppinsTextTheme(),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.poppins(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+          iconTheme: const IconThemeData(color: Colors.black87),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: const Color(0xFFFF007B),
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
       ),
-      home: const WelcomeScreen(), // Set WelcomeScreen as the initial screen
+
+      home: const WelcomeScreen(),
     );
   }
 }
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/back2.png'),
-            fit: BoxFit.fill,
+      body: Stack(
+        children: [
+          // ✅ Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/back2.png',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        child: Center(
-          // Replace Stack with Center
-          child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Center the content vertically
-            children: [
-              const Spacer(), // This pushes content down
-              const Spacer(), // This pushes content down
-              const Text(
-                'Explore the Magic',
-                style: TextStyle(
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  fontFamily: 'my',
-                ),
+
+          // ✅ Gradient overlay (looks premium)
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.60),
+                  Colors.black.withOpacity(0.25),
+                  Colors.transparent,
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
               ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                  );
-                },
-                label: const Text(
-                  'Get Started',
-                  style: TextStyle(
-                    fontFamily: 'my',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 19,
-                  ),
-                ),
-                icon: const Icon(Iconsax.arrow_right5, size: 24),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 31, 236, 232),
-                  foregroundColor: const Color.fromARGB(255, 6, 6, 6),
-                  elevation: 5,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 15,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PrivacyPolicyScreen(),
-                    ),
-                  );
-                },
-                label: const Text(
-                  'Privacy Policy',
-                  style: TextStyle(
-                    fontFamily: 'my',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-                icon: const Icon(Icons
-                    .privacy_tip_outlined), // Added an icon for consistency
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: const Color.fromARGB(255, 6, 6, 6),
-                  elevation: 5,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 15,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const Spacer(), // This pushes content up from bottom
-            ],
+            ),
           ),
-        ),
+
+          // ✅ Content
+          Padding(
+            padding: const EdgeInsets.all(25),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Explore the Magic",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w700,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.6),
+                        blurRadius: 10,
+                      )
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ✅ Get Started
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF007B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 26),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 6,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Get Started",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Iconsax.arrow_right_3, size: 22),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // ✅ Privacy Policy button (Subtle)
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => PrivacyPolicyScreen()));
+                  },
+                  child: Text(
+                    "Privacy Policy",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 14,
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.white70,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,96 +1,134 @@
-import 'dart:io';
-// import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gal/gal.dart';
 
 class FullImage extends StatelessWidget {
   final String imgUrl;
 
-  FullImage({super.key, required this.imgUrl});
+  const FullImage({super.key, required this.imgUrl});
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Future<void> saveImageToGallery(String imageUrl, BuildContext context) async {
+    if (!context.mounted) return;
 
-  Future<void> setWallpaperFromFile(
-      String wallpaperUrl, BuildContext context) async {
     try {
-      var status = await Permission.storage.request();
-      if (!status.isGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Permission denied to access storage"),
-        ));
-        return;
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Downloading...",
+            style: GoogleFonts.poppins(),
+          ),
+        ),
+      );
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Downloading Started..."),
-      ));
+      final file = await DefaultCacheManager().getSingleFile(imageUrl);
+      await Gal.putImage(file.path);
 
-      final file = await DefaultCacheManager().getSingleFile(wallpaperUrl);
-      final directory = await getExternalStorageDirectory();
-      if (directory != null) {
-        final filePath = '${directory.path}/${wallpaperUrl.split('/').last}';
-        await File(filePath).writeAsBytes(await file.readAsBytes());
-
-        await ImageGallerySaver.saveImage(await file.readAsBytes());
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Downloaded Successfully"),
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Failed to get storage directory"),
-        ));
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error Occurred: $error"),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Saved to Gallery ✅",
+            style: GoogleFonts.poppins(),
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Error: $e",
+            style: GoogleFonts.poppins(),
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      floatingActionButton: SizedBox(
-        width: 120,
-        height: 50,
-        child: FloatingActionButton(
-          onPressed: () async {
-            await setWallpaperFromFile(imgUrl, context);
-          },
-          backgroundColor: Color.fromARGB(255, 255, 255, 255),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Text(
-                'Download',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'my'),
-              ),
-              Icon(
-                Icons.download,
-                color: Color.fromARGB(
-                    255, 18, 173, 4), // Change the color of the icon here
-              ),
-            ],
+      backgroundColor: Colors.black,
+
+      // ✅ FLOATING BLUR GLASS BUTTON
+      floatingActionButton: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: FloatingActionButton.extended(
+            onPressed: () => saveImageToGallery(imgUrl, context),
+            backgroundColor: Colors.white.withOpacity(0.12),
+            elevation: 0,
+            label: Row(
+              children: [
+                Icon(
+                  Icons.download_rounded,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "Save",
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(imgUrl),
-            fit: BoxFit.cover,
+
+      body: Stack(
+        children: [
+          // ✅ FULL IMAGE
+          Positioned.fill(
+            child: Hero(
+              tag: imgUrl,
+              child: Image.network(
+                imgUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
+
+          // ✅ TOP SAFE BACK BUTTON (white)
+          Positioned(
+            top: 40,
+            left: 15,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+
+          // ✅ OPTIONAL BOTTOM GRADIENT
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 180,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0.6),
+                    Colors.transparent,
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
