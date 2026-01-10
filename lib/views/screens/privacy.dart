@@ -37,7 +37,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse('https://sites.google.com/view/wallpaperify-app/'));
+      ..loadRequest(
+          Uri.parse('https://sites.google.com/view/wallpaperify2-app'));
   }
 
   @override

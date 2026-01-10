@@ -1,49 +1,56 @@
 import 'dart:convert';
-
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:wallpaperify/model/model_category.dart';
 import 'package:wallpaperify/model/models_photo.dart';
 
-import 'dart:math';
-
 class Api {
-  static List<GetPhotos> trendingWallpapers = [];
-  static List<GetPhotos> searchWallpapersList = [];
-  static List<CategoryModel> cateogryModelList = [];
-
   static const String _apiKey =
       "HAWBZNssVzj2he7iaks5BxUtGoWGk9vlVRes8nkK7CFhEL0ZFgCOS70W";
-  static Future<List<GetPhotos>> getTrendingWallpapers() async {
-    await http.get(Uri.parse("https://api.pexels.com/v1/curated"),
-        headers: {"Authorization": _apiKey}).then((value) {
-      Map<String, dynamic> jsonData = jsonDecode(value.body);
-      List photos = jsonData['photos'];
-      for (var element in photos) {
-        trendingWallpapers.add(GetPhotos.fromAPI2App(element));
-      }
-    });
 
-    return trendingWallpapers;
+  static Future<List<GetPhotos>> getTrendingWallpapers() async {
+    List<GetPhotos> trending = [];
+
+    final url = Uri.parse("https://api.pexels.com/v1/curated?per_page=30");
+    final response = await http.get(url, headers: {"Authorization": _apiKey});
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      final List photos = jsonData['photos'];
+
+      for (var element in photos) {
+        trending.add(GetPhotos.fromAPI2App(element));
+      }
+    }
+
+    return trending;
   }
 
   static Future<List<GetPhotos>> searchWallpapers(String query) async {
-    await http.get(
-        Uri.parse(
-            "https://api.pexels.com/v1/search?query=$query&per_page=30&page=1"),
-        headers: {"Authorization": _apiKey}).then((value) {
-      Map<String, dynamic> jsonData = jsonDecode(value.body);
-      List photos = jsonData['photos'];
-      searchWallpapersList.clear();
-      for (var element in photos) {
-        searchWallpapersList.add(GetPhotos.fromAPI2App(element));
-      }
-    });
+    List<GetPhotos> searchList = [];
 
-    return searchWallpapersList;
+    final url = Uri.parse(
+        "https://api.pexels.com/v1/search?query=$query&per_page=40&page=1");
+
+    final response = await http.get(url, headers: {"Authorization": _apiKey});
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      final List photos = jsonData['photos'];
+
+      for (var element in photos) {
+        searchList.add(GetPhotos.fromAPI2App(element));
+      }
+    }
+
+    return searchList;
   }
 
-  static List<CategoryModel> getCategoriesList() {
-    List cateogryName = [
+  // ✅ FIXED CATEGORIES
+  static Future<List<CategoryModel>> getCategoriesList() async {
+    List<CategoryModel> finalList = [];
+
+    List<String> categoryNames = [
       "iphone",
       "Cars",
       "Nature",
@@ -53,16 +60,19 @@ class Api {
       "coding",
       "Flowers",
     ];
-    cateogryModelList.clear();
-    cateogryName.forEach((catName) async {
-      final random = Random();
 
-      GetPhotos photoModel =
-          (await searchWallpapers(catName))[0 + random.nextInt(11 - 0)];
-      cateogryModelList
-          .add(CategoryModel(catImgUrl: photoModel.imgSrc, catName: catName));
-    });
+    for (String cat in categoryNames) {
+      final photos = await searchWallpapers(cat);
 
-    return cateogryModelList;
+      if (photos.isNotEmpty) {
+        final randomPhoto = photos[Random().nextInt(photos.length)];
+        finalList.add(CategoryModel(
+          catImgUrl: randomPhoto.imgSrc,
+          catName: cat,
+        ));
+      }
+    }
+
+    return finalList;
   }
 }

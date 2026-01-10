@@ -17,12 +17,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late List<GetPhotos> trendingWallList;
-  late List<CategoryModel> modlist;
+  List<GetPhotos> trendingWallList = [];
+  List<CategoryModel> modlist = [];
+
   bool isLoading = true;
 
   detailsGet() async {
-    modlist = Api.getCategoriesList();
+    modlist = await Api.getCategoriesList(); // ✅ add await
     setState(() {});
   }
 
